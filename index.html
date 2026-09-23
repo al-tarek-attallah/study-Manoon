@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>امتحان منون الشامل - Oracle Financials 🌸✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .app-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 30px);
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid #ffb3c6;
+            box-shadow: 0 10px 30px rgba(255, 143, 171, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 30px);
+            position: sticky;
+            top: 15px;
+            overflow: hidden;
+        }
+
+        .sidebar h2 {
+            color: #d90429;
+            font-size: 1.4em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #ffe5ec, #ffc2d1);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #c9184a;
+            font-size: 1.1em;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .filter-btn {
+            background: #fff0f3;
+            border: 2px solid #ffccd5;
+            color: #c9184a;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.72em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter-btn:hover { background: #ffd6e0; }
+        .filter-btn.active {
+            background: linear-gradient(45deg, #ff4d6d, #c9184a);
+            color: #fff;
+            border-color: #c9184a;
+        }
+
+        .q-grid-title {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            overflow-y: auto;
+            flex: 1;
+            padding: 4px;
+            align-content: start;
+        }
+
+        .q-num {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: 0.15s;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .q-num:hover { transform: scale(1.1); border-color: #ff8fa3; }
+        .q-num.current {
+            background: linear-gradient(45deg, #ff4d6d, #c9184a);
+            color: #fff;
+            border-color: #c9184a;
+            box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.3);
+        }
+        .q-num.correct {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .q-num.wrong {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .q-num.hidden { display: none; }
+
+        .legend {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ffccd5;
+        }
+
+        .legend span { display: flex; align-items: center; gap: 3px; }
+        .legend i {
+            width: 10px; height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        /* === MAIN CONTENT === */
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 143, 171, 0.3);
+            padding: 25px;
+            border: 3px solid #ffb3c6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h1 { color: #d90429; font-size: 1.8em; }
+        .header p { color: #ff4d6d; font-weight: 700; }
+
+        .progress-container {
+            width: 100%;
+            background-color: #ffeff3;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff758f, #ff4d6d);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: #fff0f3;
+            border: 2px solid #ffccd5;
+            color: #c9184a;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background: #ffd6e0; }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .nav-btn.primary {
+            background: linear-gradient(45deg, #ff4d6d, #c9184a);
+            color: #fff;
+            border-color: #c9184a;
+        }
+
+        .module-badge {
+            display: inline-block;
+            background: #ffe5ec;
+            color: #c9184a;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-family: Arial, sans-serif;
+            direction: ltr;
+            text-align: left;
+            font-size: 1.2em;
+            color: #2b2d42;
+            margin-bottom: 15px;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #ff4d6d;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            direction: ltr;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid #ffccd5;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1em;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #4a4e69;
+            font-family: Arial, sans-serif;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #fff0f3;
+            border-color: #ff8fa3;
+            transform: translateX(5px);
+        }
+
+        .option-btn:disabled { cursor: not-allowed; transform: none; }
+        .option-btn.correct { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .option-btn.wrong { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .feedback.correct-bg { background-color: #e6ffed; border: 2px solid #a3e6b5; }
+        .feedback.wrong-bg { background-color: #fff0f0; border: 2px solid #ffcaca; }
+
+        .feedback-title { font-size: 1.3em; font-weight: 900; margin-bottom: 6px; }
+
+        .explanation {
+            font-family: Arial, sans-serif;
+            direction: ltr;
+            text-align: left;
+            color: #333;
+            font-size: 1em;
+            line-height: 1.5;
+            background: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === RESULT === */
+        .result-screen { display: none; text-align: center; padding: 20px; }
+        .result-screen h2 { color: #c9184a; font-size: 2.2em; margin-bottom: 15px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #fff0f3;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ffccd5;
+        }
+
+        .stat-box .num { font-size: 1.8em; font-weight: 900; color: #c9184a; }
+        .stat-box .lbl { font-size: 0.85em; color: #666; }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+                max-height: 400px;
+            }
+            .question-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- === SIDEBAR === -->
+    <aside class="sidebar">
+        <h2>🌸 منون العبقرية</h2>
+
+        <div class="score-display" id="score-display">
+            النتيجة: 0 / 0
+        </div>
+
+        <div class="filters" id="filters">
+            <button class="filter-btn active" data-module="all">الكل</button>
+            <button class="filter-btn" data-module="Cash Management">Cash Mgmt</button>
+            <button class="filter-btn" data-module="Fixed Assets">Fixed Assets</button>
+            <button class="filter-btn" data-module="General Ledger">GL</button>
+            <button class="filter-btn" data-module="Receivables">Receivables</button>
+            <button class="filter-btn" data-module="GL & AP">GL & AP</button>
+            <button class="filter-btn" data-module="Oracle Fusion Tax">Tax</button>
+        </div>
+
+        <div class="q-grid-title">اضغطي على رقم السؤال للانتقال السريع</div>
+
+        <div class="question-grid" id="question-grid"></div>
+
+        <div class="legend">
+            <span><i style="background:#f8f9fa;border:2px solid #e0e0e0"></i> لم يُجب</span>
+            <span><i style="background:#d4edda;border:2px solid #28a745"></i> صح</span>
+            <span><i style="background:#f8d7da;border:2px solid #dc3545"></i> غلط</span>
+        </div>
+
+        <button class="nav-btn primary" style="margin-top:12px;" onclick="showResults()">عرض النتيجة 🏁</button>
+        <button class="nav-btn" style="margin-top:6px;" onclick="resetQuiz()">إعادة البدء 🔄</button>
+    </aside>
+
+    <!-- === MAIN === -->
+    <main class="quiz-container">
+
+        <div id="quiz-screen">
+            <div class="header">
+                <h1>مراجعة Oracle Financials الشاملة</h1>
+                <p id="progress-text">سؤال 1 من 1</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="nav-controls">
+                <button class="nav-btn" id="prev-btn" onclick="prevQuestion()">⬅️ السابق</button>
+                <button class="nav-btn primary" id="next-btn-top" onclick="nextQuestion()">التالي ➡️</button>
+            </div>
+
+            <div style="text-align:center;">
+                <span class="module-badge" id="module-badge">Module</span>
+            </div>
+
+            <div class="question-text" id="question">Loading...</div>
+
+            <div class="options-container" id="options"></div>
+
+            <div class="feedback" id="feedback">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div id="feedback-encouragement" style="font-weight:bold; margin-bottom: 8px;"></div>
+                <div class="explanation" id="explanation"></div>
+            </div>
+
+            <button class="nav-btn primary" id="next-btn-bottom" style="display:none; margin-top:15px;" onclick="nextQuestion()">السؤال اللي بعده يا بطلة 🚀</button>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h2>خلصنا يا قمر! 🎉</h2>
+            <div style="font-size: 4em; margin: 15px 0;">💖🎓</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="num" id="stat-total">0</div>
+                    <div class="lbl">إجمالي</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num" id="stat-correct" style="color:#28a745;">0</div>
+                    <div class="lbl">صح ✅</div>
+                </div>
+                <div class="stat-box">
+                    <div class="num" id="stat-wrong" style="color:#dc3545;">0</div>
+                    <div class="lbl">غلط ❌</div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.8em; color: #2b2d42;">نسبتك: <span id="final-score" style="color: #d90429;"></span></h3>
+            <p id="final-message" style="font-size: 1.3em; margin-top: 15px; color: #4a4e69;"></p>
+
+            <button class="nav-btn primary" style="margin-top:20px; max-width:300px; margin-left:auto; margin-right:auto; display:block;" onclick="resetQuiz()">عايزة تعيدي تاني؟ 🔄</button>
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+// ============ BANK OF QUESTIONS ============
+const allQuestions = [
+    // ===== CASH MANAGEMENT =====
+    { module: "Cash Management", q: "What provides the legal and operational foundation for internal accounts, supplier/customer banking, payment formats, and cash reporting?",
+      options: ["A) Bank master data", "B) Chart of Accounts", "C) Legal Entity", "D) Accounting Calendar"],
+      correctIndex: 0,
+      explanation: "Bank master data provides the legal and operational foundation for internal accounts, supplier/customer banking, payment formats, statement import, and cash reporting." },
+
+    { module: "Cash Management", q: "Which of the following is NOT one of the four bank setup components?",
+      options: ["A) Bank", "B) Bank branch", "C) Internal account ownership", "D) Depreciation method"],
+      correctIndex: 3,
+      explanation: "The four components are: Bank, Bank branch, Internal account ownership, Bank account control. Depreciation belongs to Fixed Assets." },
+
+    { module: "Cash Management", q: "In the five-step configuration path for Bank setup, what is the FIRST step?",
+      options: ["A) Create bank", "B) Define standards", "C) Create branch", "D) Validate reuse"],
+      correctIndex: 1,
+      explanation: "Step 1 is 'Define standards' — document required bank/branch identifiers, naming, duplicate checks, and source evidence by country." },
+
+    { module: "Cash Management", q: "Which step involves adding routing identifiers, contacts, branch attributes, and relationship to the bank?",
+      options: ["A) Create bank", "B) Create branch", "C) Assign responsibility", "D) Validate reuse"],
+      correctIndex: 1,
+      explanation: "Step 3 'Create branch' — Add routing identifiers, contacts, branch attributes, and relationship to the bank." },
+
+    { module: "Cash Management", q: "What does 'Assign responsibility' in bank configuration mean?",
+      options: ["A) Assign bank to legal entity", "B) Separate bank-master maintenance, account creation, payment setup, and reconciliation access", "C) Assign bank to business unit", "D) Assign currency to bank"],
+      correctIndex: 1,
+      explanation: "Step 4 is about segregation of duties — separating who maintains bank master data vs. who creates accounts vs. payment setup vs. reconciliation." },
+
+    { module: "Cash Management", q: "What is the purpose of 'Validate reuse' step?",
+      options: ["A) Delete old banks", "B) Search before creation and confirm the bank/branch can support intended account and file formats", "C) Create new bank", "D) Approve bank changes"],
+      correctIndex: 1,
+      explanation: "Step 5 'Validate reuse' — Search before creation and confirm the bank/branch can support the intended account and file formats." },
+
+    { module: "Cash Management", q: "Which control prevents duplicate banks?",
+      options: ["A) Change approval", "B) Duplicate prevention", "C) Inactive-data policy", "D) Dual approval"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Duplicate prevention — Country and bank identifiers should be validated before creating a new institution or branch." },
+
+    { module: "Cash Management", q: "Why should obsolete branches be end-dated rather than deleted?",
+      options: ["A) To save storage", "B) Because existing accounts and transactions still reference the history", "C) Because Oracle doesn't allow deletion", "D) To improve performance"],
+      correctIndex: 1,
+      explanation: "CONTROL03 Inactive-data policy — End-date obsolete branches rather than deleting history used by existing accounts and transactions." },
+
+    { module: "Cash Management", q: "Which changes could redirect payments?",
+      options: ["A) Changing bank name", "B) Routing and identity changes", "C) Changing branch address", "D) Changing contact person"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Change approval — Routing and identity changes can redirect funds and require independent evidence." },
+
+    { module: "Cash Management", q: "Internal bank accounts combine all of the following EXCEPT:",
+      options: ["A) Ownership", "B) Security", "C) Depreciation", "D) Statement processing"],
+      correctIndex: 2,
+      explanation: "Internal bank accounts combine ownership, security, accounting, payment/receipt uses, statement processing, and transfer behavior." },
+
+    { module: "Cash Management", q: "What authorizes an internal account for payables disbursement, receivables remittance, payroll, or other cash purposes?",
+      options: ["A) Account access", "B) Account use", "C) Bank transfer", "D) Cash forecast"],
+      correctIndex: 1,
+      explanation: "Account use — Authorizes an internal account for payables disbursement, receivables remittance, payroll, or other cash purposes." },
+
+    { module: "Cash Management", q: "What restricts who can use or view an account by business unit, legal entity, and role?",
+      options: ["A) Account use", "B) Account access", "C) Bank transfer", "D) Cash forecast"],
+      correctIndex: 1,
+      explanation: "Account access — Restricts who can use or view an account by business unit, legal entity, and role." },
+
+    { module: "Cash Management", q: "What moves cash between internal accounts and records the corresponding outflow, inflow, fees, and clearing?",
+      options: ["A) Account use", "B) Bank transfer", "C) Cash forecast", "D) Account access"],
+      correctIndex: 1,
+      explanation: "Bank transfer — Moves cash between internal accounts and records the corresponding outflow, inflow, fees, and clearing." },
+
+    { module: "Cash Management", q: "In the five-step configuration path for Bank Accounts, what comes immediately after 'Create account'?",
+      options: ["A) Configure accounting", "B) Assign uses/access", "C) Process transfer", "D) Build position"],
+      correctIndex: 1,
+      explanation: "Step 1 Create account → Step 2 Assign uses/access → Step 3 Configure accounting → Step 4 Process transfer → Step 5 Build position." },
+
+    { module: "Cash Management", q: "Which step involves setting cash, cash clearing, bank charges, transfer, and reconciliation accounts?",
+      options: ["A) Create account", "B) Assign uses/access", "C) Configure accounting", "D) Process transfer"],
+      correctIndex: 2,
+      explanation: "Step 3 Configure accounting — Set cash, cash clearing, bank charges, transfer, and reconciliation accounts." },
+
+    { module: "Cash Management", q: "What does 'Build position' involve?",
+      options: ["A) Creating a bank account", "B) Grouping accounts and including bank balances, system transactions, and forecasts by value date", "C) Processing transfers", "D) Setting up accounting"],
+      correctIndex: 1,
+      explanation: "Step 5 Build position — Group accounts and include bank balances, system transactions, and forecasts by value date." },
+
+    { module: "Cash Management", q: "Which control limits visibility of account numbers and bank details to users with a business need?",
+      options: ["A) Dual approval", "B) Sensitive data", "C) Value-date discipline", "D) Duplicate prevention"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Sensitive data — Limit visibility of account numbers and bank details to users with a business need." },
+
+    { module: "Cash Management", q: "High-value transfers should require:",
+      options: ["A) Single approval", "B) Independent authorization and verified destination accounts", "C) No approval", "D) Only system validation"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Dual approval — High-value transfers should require independent authorization and verified destination accounts." },
+
+    { module: "Cash Management", q: "Liquidity reporting should use bank value dates and currency assumptions consistently. This is:",
+      options: ["A) Sensitive data", "B) Dual approval", "C) Value-date discipline", "D) Duplicate prevention"],
+      correctIndex: 2,
+      explanation: "CONTROL03 Value-date discipline — Liquidity reporting should use bank value dates and currency assumptions consistently." },
+
+    { module: "Cash Management", q: "What is the difference between account use and access?",
+      options: ["A) No difference", "B) Use authorizes purpose; access restricts who can view/use by BU, legal entity, role", "C) Access authorizes purpose; use restricts who can view", "D) Both are the same"],
+      correctIndex: 1,
+      explanation: "Account use authorizes purpose (AP, AR, payroll). Account access restricts who can use or view an account by business unit, legal entity, and role." },
+
+    { module: "Cash Management", q: "Which accounts are needed for a bank transfer?",
+      options: ["A) Only source account", "B) Only destination account", "C) Both source and destination internal accounts, plus clearing accounts", "D) No accounts needed"],
+      correctIndex: 2,
+      explanation: "A bank transfer moves cash between internal accounts and records outflow, inflow, fees, and clearing — so both sides plus clearing are needed." },
+
+    { module: "Cash Management", q: "Why does value date matter in liquidity reporting?",
+      options: ["A) It doesn't matter", "B) It determines when cash actually affects the bank balance, not just when the transaction was entered", "C) It's only for reporting", "D) It's the same as accounting date"],
+      correctIndex: 1,
+      explanation: "Value-date discipline ensures liquidity reporting uses bank value dates consistently — the actual date funds are available." },
+
+    // ===== FIXED ASSETS =====
+    { module: "Fixed Assets", q: "What defines financial or tax depreciation rules, calendar, currency, accounts, and transaction control?",
+      options: ["A) Asset category", "B) Asset book", "C) Depreciation", "D) CIP"],
+      correctIndex: 1,
+      explanation: "Asset book — Defines financial or tax depreciation rules, calendar, currency, accounts, and transaction control." },
+
+    { module: "Fixed Assets", q: "What defaults accounts, depreciation method, life, conventions, and descriptive classification?",
+      options: ["A) Asset book", "B) Asset category", "C) Depreciation", "D) CIP"],
+      correctIndex: 1,
+      explanation: "Asset category — Defaults accounts, depreciation method, life, conventions, and descriptive classification." },
+
+    { module: "Fixed Assets", q: "What allocates depreciable cost across periods using method, life, rate, convention, and in-service date?",
+      options: ["A) Asset book", "B) Asset category", "C) Depreciation", "D) CIP"],
+      correctIndex: 2,
+      explanation: "Depreciation — Allocates depreciable cost across periods using method, life, rate, convention, and in-service date." },
+
+    { module: "Fixed Assets", q: "What accumulates project or construction costs without depreciation until capitalization?",
+      options: ["A) Asset book", "B) Asset category", "C) Depreciation", "D) Construction in Progress (CIP)"],
+      correctIndex: 3,
+      explanation: "Construction in Progress — Accumulates project or construction costs without depreciation until capitalization into one or more assets." },
+
+    { module: "Fixed Assets", q: "In the five-step configuration path for Assets, what is Step 1?",
+      options: ["A) Create categories", "B) Configure book", "C) Set methods/conventions", "D) Add assets"],
+      correctIndex: 1,
+      explanation: "Step 1 Configure book — Define calendar, currency, accounting rules, depreciation settings, and ledger integration." },
+
+    { module: "Fixed Assets", q: "What does 'Create categories' involve?",
+      options: ["A) Defining calendar", "B) Assigning asset cost, clearing, depreciation expense, reserve, retirement, and CIP accounts", "C) Setting useful lives", "D) Adding assets"],
+      correctIndex: 1,
+      explanation: "Step 2 Create categories — Assign asset cost, clearing, depreciation expense, reserve, retirement, and CIP accounts." },
+
+    { module: "Fixed Assets", q: "Which step creates approved useful lives, rates, prorate conventions, and ceilings?",
+      options: ["A) Configure book", "B) Create categories", "C) Set methods/conventions", "D) Add assets"],
+      correctIndex: 2,
+      explanation: "Step 3 Set methods/conventions — Create approved useful lives, rates, prorate conventions, and ceilings where applicable." },
+
+    { module: "Fixed Assets", q: "What does 'Capitalize' step involve?",
+      options: ["A) Creating categories", "B) Reviewing accumulated cost, allocating to final assets, setting dates/categories, and starting depreciation", "C) Adding manual assets", "D) Setting methods"],
+      correctIndex: 1,
+      explanation: "Step 5 Capitalize — Review accumulated cost, allocate to final assets, set dates/categories, and start depreciation." },
+
+    { module: "Fixed Assets", q: "Which control requires Finance to define thresholds, eligible costs, useful lives, and componentization rules?",
+      options: ["A) Date accuracy", "B) Capitalization policy", "C) CIP aging", "D) Clearing reconciliation"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Capitalization policy — Finance must define thresholds, eligible costs, useful lives, and componentization rules." },
+
+    { module: "Fixed Assets", q: "Which dates directly affect depreciation and period cutoff?",
+      options: ["A) Creation date", "B) In-service and prorate dates", "C) Purchase date", "D) Approval date"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Date accuracy — In-service and prorate dates directly affect depreciation and period cutoff." },
+
+    { module: "Fixed Assets", q: "What should be reviewed for old or inactive CIP balances?",
+      options: ["A) Only the amount", "B) Project-owner explanations", "C) Only the date", "D) Nothing"],
+      correctIndex: 1,
+      explanation: "CONTROL03 CIP aging — Review old or inactive CIP balances and require project-owner explanations." },
+
+    { module: "Fixed Assets", q: "What does an asset category default?",
+      options: ["A) Only accounts", "B) Accounts, depreciation method, life, conventions, and descriptive classification", "C) Only depreciation method", "D) Only life"],
+      correctIndex: 1,
+      explanation: "Asset category defaults accounts, depreciation method, life, conventions, and descriptive classification." },
+
+    { module: "Fixed Assets", q: "Which date begins depreciation?",
+      options: ["A) Purchase date", "B) In-service date", "C) Approval date", "D) Creation date"],
+      correctIndex: 1,
+      explanation: "Depreciation uses method, life, rate, convention, and in-service date — the in-service date begins depreciation." },
+
+    { module: "Fixed Assets", q: "How should aged CIP be controlled?",
+      options: ["A) Ignore it", "B) Review old/inactive CIP balances and require project-owner explanations", "C) Delete it", "D) Depreciate it immediately"],
+      correctIndex: 1,
+      explanation: "CIP aging control requires reviewing old or inactive CIP balances with explanations from project owners." },
+
+    { module: "Fixed Assets", q: "What integrates capital purchases from Payables?",
+      options: ["A) Manual addition", "B) Mass addition", "C) Transfer", "D) Reclassification"],
+      correctIndex: 1,
+      explanation: "Mass additions integrate capital purchases from Payables." },
+
+    { module: "Fixed Assets", q: "What changes cost, life, method, salvage value, units, or other depreciable attributes with effective-date accounting?",
+      options: ["A) Mass addition", "B) Adjustment", "C) Transfer", "D) Reclassification"],
+      correctIndex: 1,
+      explanation: "Adjustment — Changes cost, life, method, salvage value, units, or other depreciable attributes with effective-date accounting." },
+
+    { module: "Fixed Assets", q: "What moves assignment such as location, employee, cost center, or balancing segment without losing asset history?",
+      options: ["A) Mass addition", "B) Adjustment", "C) Transfer", "D) Reclassification"],
+      correctIndex: 2,
+      explanation: "Transfer — Moves assignment such as location, employee, cost center, or balancing segment without losing asset history." },
+
+    { module: "Fixed Assets", q: "What changes asset category and updates future defaults and accounting according to configured rules?",
+      options: ["A) Mass addition", "B) Adjustment", "C) Transfer", "D) Reclassification"],
+      correctIndex: 3,
+      explanation: "Reclassification — Changes asset category and updates future defaults and accounting according to configured rules." },
+
+    { module: "Fixed Assets", q: "In the five-step path for Mass Additions, what is Step 1?",
+      options: ["A) Review queue", "B) Prepare source", "C) Complete attributes", "D) Post additions"],
+      correctIndex: 1,
+      explanation: "Step 1 Prepare source — Validate AP distributions, asset clearing accounts, categories, descriptions, quantities, and supporting documents." },
+
+    { module: "Fixed Assets", q: "Which step identifies new, on-hold, merged, split, posted, and rejected mass-addition lines?",
+      options: ["A) Prepare source", "B) Review queue", "C) Complete attributes", "D) Post additions"],
+      correctIndex: 1,
+      explanation: "Step 2 Review queue — Identify new, on-hold, merged, split, posted, and rejected mass-addition lines." },
+
+    { module: "Fixed Assets", q: "Which control ensures every capital AP line must be posted, expensed, held with reason, or corrected?",
+      options: ["A) Retroactive impact", "B) Clearing reconciliation", "C) Custody trail", "D) Capitalization policy"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Clearing reconciliation — Every capital AP line must be posted, expensed, held with reason, or corrected." },
+
+    { module: "Fixed Assets", q: "What must a transfer preserve?",
+      options: ["A) Only the new location", "B) Who had the asset, where it moved, effective date, and approver", "C) Only the date", "D) Nothing"],
+      correctIndex: 1,
+      explanation: "CONTROL03 Custody trail — Transfers must preserve who had the asset, where it moved, effective date, and approver." },
+
+    { module: "Fixed Assets", q: "What is the purpose of the asset clearing account?",
+      options: ["A) To hold assets temporarily", "B) To reconcile capital AP lines until they are posted, expensed, held, or corrected", "C) To depreciate assets", "D) To retire assets"],
+      correctIndex: 1,
+      explanation: "The clearing account is used to reconcile every capital AP line — it must be posted, expensed, held with reason, or corrected." },
+
+    { module: "Fixed Assets", q: "How can a backdated adjustment affect depreciation?",
+      options: ["A) No effect", "B) It can change prior depreciation; catch-up and reporting effects must be reviewed", "C) It only affects future periods", "D) It reverses depreciation"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Retroactive impact — Backdated adjustments can change prior depreciation; review catch-up and reporting effects." },
+
+    { module: "Fixed Assets", q: "What calculates periodic depreciation and related accounting, and rollback reverses an eligible run before correction and rerun?",
+      options: ["A) Retirement", "B) Depreciation run/rollback", "C) Reinstatement", "D) Physical inventory"],
+      correctIndex: 1,
+      explanation: "Depreciation run/rollback — Calculates periodic depreciation and related accounting; rollback reverses an eligible run before correction and rerun." },
+
+    { module: "Fixed Assets", q: "What removes all or part of an asset's cost and reserve and calculates gain or loss and proceeds?",
+      options: ["A) Depreciation", "B) Retirement", "C) Reinstatement", "D) Physical inventory"],
+      correctIndex: 1,
+      explanation: "Retirement — Removes all or part of an asset's cost and reserve and calculates gain or loss and proceeds." },
+
+    { module: "Fixed Assets", q: "What reverses an eligible retirement when disposal was recorded incorrectly or later canceled?",
+      options: ["A) Depreciation", "B) Retirement", "C) Reinstatement", "D) Physical inventory"],
+      correctIndex: 2,
+      explanation: "Reinstatement — Reverses an eligible retirement when disposal was recorded incorrectly or later canceled." },
+
+    { module: "Fixed Assets", q: "What compares observed assets and locations with system records to identify missing, found, or moved items?",
+      options: ["A) Depreciation", "B) Retirement", "C) Reinstatement", "D) Physical inventory"],
+      correctIndex: 3,
+      explanation: "Physical inventory — Compares observed assets and locations with system records to identify missing, found, or moved items." },
+
+    { module: "Fixed Assets", q: "In the five-step path for Depreciation/Retirement/Inventory, what is Step 1?",
+      options: ["A) Run depreciation", "B) Validate readiness", "C) Process retirement", "D) Reconcile inventory"],
+      correctIndex: 1,
+      explanation: "Step 1 Validate readiness — Review additions, adjustments, transfers, retirements, suspended assets, and open exceptions." },
+
+    { module: "Fixed Assets", q: "What must be resolved before closing an asset period?",
+      options: ["A) Nothing", "B) Depreciation errors and unprocessed transactions", "C) Only depreciation", "D) Only unprocessed transactions"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Run completeness — No asset period closes until depreciation errors and unprocessed transactions are resolved." },
+
+    { module: "Fixed Assets", q: "Retirement requires all of the following EXCEPT:",
+      options: ["A) Approval", "B) Evidence of disposal", "C) Proceeds validation", "D) Depreciation rollback"],
+      correctIndex: 3,
+      explanation: "CONTROL02 Disposal authorization — Retirement requires approval, evidence of disposal, proceeds validation, and gain/loss review. Depreciation rollback is separate." },
+
+    { module: "Fixed Assets", q: "Why should inventory counts be independent?",
+      options: ["A) It's faster", "B) To ensure independence from day-to-day asset custody", "C) It's cheaper", "D) It's required by law"],
+      correctIndex: 1,
+      explanation: "CONTROL03 Independent count — Physical inventory should be performed by staff independent of day-to-day asset custody where possible." },
+
+    { module: "Fixed Assets", q: "How is retirement gain or loss derived?",
+      options: ["A) Cost minus reserve", "B) Proceeds minus net book value (cost minus accumulated depreciation)", "C) Cost minus proceeds", "D) Reserve minus proceeds"],
+      correctIndex: 1,
+      explanation: "Retirement removes cost and reserve, then calculates gain or loss using proceeds — effectively proceeds vs. net book value." },
+
+    // ===== GENERAL LEDGER =====
+    { module: "General Ledger", q: "Where do you access the Security Console in Oracle Fusion?",
+      options: ["A) Setup and Maintenance", "B) Tools > Security Console", "C) Navigator > Security", "D) Administration > Security"],
+      correctIndex: 1,
+      explanation: "From the Navigator, go to Tools > Security Console. It's used to create users, reset passwords, and assign/manage user roles." },
+
+    { module: "General Ledger", q: "What is the first step in creating a new user account?",
+      options: ["A) Enter first name", "B) Select Users, then click Add User Account", "C) Set user category", "D) Enter password"],
+      correctIndex: 1,
+      explanation: "Step 1: Select Users, then click Add User Account to open the user creation form." },
+
+    { module: "General Ledger", q: "When creating a user, what should the User Category be set to?",
+      options: ["A) WORKER", "B) DEFAULT", "C) USER", "D) EMPLOYEE"],
+      correctIndex: 1,
+      explanation: "Under User Information, set the User Category to DEFAULT." },
+
+    { module: "General Ledger", q: "What does the Chart of Accounts (COA) consist of?",
+      options: ["A) Only Company segment", "B) Different segments such as Company, Cost Center, and Natural Account", "C) Only Natural Account", "D) Only Cost Center"],
+      correctIndex: 1,
+      explanation: "The COA consists of different segments, such as Company, Cost Center, and Natural Account, which help identify where a transaction belongs and how it should be reported." },
+
+    { module: "General Ledger", q: "What is a value set used for?",
+      options: ["A) To define valid values for a particular COA segment", "B) To define legal entities", "C) To define currencies", "D) To define calendars"],
+      correctIndex: 0,
+      explanation: "A value set defines the valid values that can be entered for a particular COA segment. It also controls basic rules such as value format, length, and type." },
+
+    { module: "General Ledger", q: "How many value sets are required for the COA described in the manual?",
+      options: ["A) 3", "B) 4", "C) 5", "D) 6"],
+      correctIndex: 2,
+      explanation: "Five value sets are required for the Company, Cost Center, Business Unit, Natural Account segments, and Intercompany Unit." },
+
+    { module: "General Ledger", q: "What is the naming convention for the Company segment value set?",
+      options: ["A) NC_COMPANY", "B) NC_COST_CENTER", "C) NC_NATURAL_ACCOUNT", "D) NC_INTER_COMPANY"],
+      correctIndex: 0,
+      explanation: "The Company segment value set is created with Value Set Code NC_COMPANY." },
+
+    { module: "General Ledger", q: "What does the Natural Account value set define?",
+      options: ["A) Company codes", "B) Cost center codes", "C) Valid account codes (assets, liabilities, equity, revenue, expenses)", "D) Intercompany codes"],
+      correctIndex: 2,
+      explanation: "The Natural Account value set defines the valid account codes used in the COA. It is typically configured with a numeric value type and supports account ranges." },
+
+    { module: "General Ledger", q: "What does the Intercompany value set define?",
+      options: ["A) Valid company codes", "B) Valid intercompany codes for transactions between different companies/legal entities", "C) Valid cost centers", "D) Valid accounts"],
+      correctIndex: 1,
+      explanation: "The Intercompany value set defines valid intercompany codes used to identify and record transactions between different companies or legal entities within the organization." },
+
+    { module: "General Ledger", q: "What does the COA Structure define?",
+      options: ["A) Only the order of segments", "B) The segments that make up the accounting structure, their order, and the value set assigned to each", "C) Only the value sets", "D) Only the ledger"],
+      correctIndex: 1,
+      explanation: "The COA Structure defines the segments that make up the accounting structure, determines the order of segments, and specifies the value set assigned to each." },
+
+    { module: "General Ledger", q: "What is a structure instance?",
+      options: ["A) A copy of the COA structure", "B) An enabled, ledger-ready copy of the Chart of Accounts structure", "C) A value set", "D) A legal entity"],
+      correctIndex: 1,
+      explanation: "A structure instance is an enabled, ledger-ready copy of the COA structure. Create the COA instance and assign it the shared value sets defined above." },
+
+    { module: "General Ledger", q: "What must happen before the Chart of Accounts can be used by a ledger?",
+      options: ["A) Nothing", "B) It must be deployed", "C) It must be deleted", "D) It must be copied"],
+      correctIndex: 1,
+      explanation: "Once the structure and instance are complete, the COA must be deployed before it can be used by a ledger. Click Deploy to submit the deployment process." },
+
+    { module: "General Ledger", q: "What is the purpose of the accounting calendar?",
+      options: ["A) To define currencies", "B) To define the accounting periods (monthly, quarterly, etc.) that the ledger will use", "C) To define legal entities", "D) To define the COA"],
+      correctIndex: 1,
+      explanation: "The accounting calendar defines the accounting periods — monthly, in this case — that the ledger will use to record and close transactions." },
+
+    { module: "General Ledger", q: "When setting up an accounting calendar, the Start Date should be:",
+      options: ["A) The start of the current year", "B) A full year before the start of the year of the ledger's first translation period", "C) The start of next year", "D) Any date"],
+      correctIndex: 1,
+      explanation: "Set the Start Date — this should be a full year before the start of the year of the ledger's first translation period." },
+
+    { module: "General Ledger", q: "What must exist before a legal entity can be created?",
+      options: ["A) A ledger", "B) A legal jurisdiction", "C) A bank", "D) A calendar"],
+      correctIndex: 1,
+      explanation: "Before a legal entity can be created, its legal jurisdiction must exist — this defines the territory and legislative category the entity is registered under." },
+
+    { module: "General Ledger", q: "Where do you navigate to manage legal entities?",
+      options: ["A) Financials > General Ledger", "B) Legal Structures task list > Manage Legal Entity", "C) Financials > Financial Reporting Structures", "D) Setup > Legal Entities"],
+      correctIndex: 1,
+      explanation: "Return to the Legal Structures task list and select Manage Legal Entity." },
+
+    { module: "General Ledger", q: "What is the primary ledger?",
+      options: ["A) A legal entity", "B) The record that brings together the COA instance, accounting calendar, currency, and legal entity", "C) A bank account", "D) A value set"],
+      correctIndex: 1,
+      explanation: "The primary ledger brings together: the Chart of Accounts instance, the accounting calendar, the currency, and — once assigned — the legal entity." },
+
+    { module: "General Ledger", q: "Which account is mandatory before the ledger can be submitted?",
+      options: ["A) Cash account", "B) Retained Earnings Account", "C) Bank account", "D) Revenue account"],
+      correctIndex: 1,
+      explanation: "Enter the Retained Earnings Account, which is mandatory before the ledger can be submitted." },
+
+    { module: "General Ledger", q: "What must be assigned to the legal entity so that transactions can be automatically balanced by legal entity?",
+      options: ["A) Currency", "B) Balancing segment values (Company)", "C) Calendar", "D) COA structure"],
+      correctIndex: 1,
+      explanation: "Balancing segment values (Company, in this COA) must be assigned to the legal entity so that transactions can be automatically balanced by legal entity." },
+
+    { module: "General Ledger", q: "What is the final step in the GL setup?",
+      options: ["A) Create ledger", "B) Assign legal entity", "C) Review and Submit Accounting Configuration", "D) Open period"],
+      correctIndex: 2,
+      explanation: "The final step is to review the full accounting configuration — legal entities and ledgers together — and submit it." },
+
+    { module: "General Ledger", q: "What is the first step in the General Ledger flow?",
+      options: ["A) Post Journals", "B) Open Period", "C) Create/Import/Reverse Journals", "D) Close Period"],
+      correctIndex: 1,
+      explanation: "The GL flow starts with Open Period → Create/Import/Reverse Journals → Post Journals → Review Balance → Revaluation/Translation → Consolidation → Run Financial Report → Close Period." },
+
+    { module: "General Ledger", q: "What comes after 'Post Journals' in the GL flow?",
+      options: ["A) Open Period", "B) Create Journals", "C) Review Balance and Perform Reconciliation", "D) Close Period"],
+      correctIndex: 2,
+      explanation: "After Post Journals, the next step is Review Balance and Perform Reconciliation." },
+
+    { module: "General Ledger", q: "What is the final step in the GL flow?",
+      options: ["A) Open Period", "B) Post Journals", "C) Run Financial Report", "D) Close Period"],
+      correctIndex: 3,
+      explanation: "The GL flow ends with Close Period after Run Financial Report." },
+
+    { module: "General Ledger", q: "Where do you go to open a GL period?",
+      options: ["A) Journals", "B) Period Close", "C) General Accounting Dashboard", "D) Setup"],
+      correctIndex: 1,
+      explanation: "From the General Accounting Dashboard, click Period Close to manage period statuses." },
+
+    { module: "General Ledger", q: "What is the process for creating a GL journal manually?",
+      options: ["A) Journals > Create Journal", "B) Period Close > Open Period", "C) Reports > Create Journal", "D) Setup > Journal"],
+      correctIndex: 0,
+      explanation: "Navigate to Journals > Create Journal to create a manual GL journal." },
+
+    { module: "General Ledger", q: "What does 'AutoReverse Journals' do?",
+      options: ["A) Creates new journals", "B) Creates and posts journal reversals based on rules", "C) Deletes journals", "D) Posts journals"],
+      correctIndex: 1,
+      explanation: "AutoReverse Journals creates and posts journal reversals based on the defined criteria." },
+
+    { module: "General Ledger", q: "What does 'AutoPost' do?",
+      options: ["A) Creates journals", "B) Selects and posts journal batches based on AutoPost criteria", "C) Reverses journals", "D) Deletes journals"],
+      correctIndex: 1,
+      explanation: "AutoPost selects and posts journal batches based on the AutoPost Criteria Set." },
+
+    { module: "General Ledger", q: "What is needed to create GL journals with a spreadsheet?",
+      options: ["A) Only Excel", "B) Oracle ADF Desktop Integration Add-in for Excel", "C) Only Oracle", "D) Only a browser"],
+      correctIndex: 1,
+      explanation: "You need the Oracle ADF Desktop Integration Add-in for Excel to create GL journals with a spreadsheet." },
+
+    { module: "General Ledger", q: "What macro setting is required for the GL journal spreadsheet?",
+      options: ["A) Disable all macros", "B) Enable all macros", "C) Disable all macros except digitally signed", "D) No macros"],
+      correctIndex: 1,
+      explanation: "In Excel Trust Center > Macro Settings, select 'Enable all macros' and check 'Trust access to the VBA project object model.'" },
+
+    { module: "General Ledger", q: "What report is used for GL trial balance?",
+      options: ["A) Payables Trial Balance Report", "B) General Ledger Trial Balance Report", "C) Receivables Trial Balance Report", "D) Assets Trial Balance Report"],
+      correctIndex: 1,
+      explanation: "The General Ledger Trial Balance Report lists detail or summary actual account balances." },
+
+    { module: "General Ledger", q: "What is an account group used for?",
+      options: ["A) Grouping accounts for reporting and monitoring", "B) Creating accounts", "C) Deleting accounts", "D) Posting journals"],
+      correctIndex: 0,
+      explanation: "An account group groups accounts for display in Account Monitor and reporting." },
+
+    // ===== RECEIVABLES =====
+    { module: "Receivables", q: "What is the credit-to-cash lifecycle?",
+      options: ["A) From customer setup to billing through receipt, application, collection, accounting, and reconciliation", "B) Only billing", "C) Only collection", "D) Only receipt"],
+      correctIndex: 0,
+      explanation: "Credit-to-cash — The lifecycle from customer setup and billing through receipt, application, collection, accounting, and reconciliation." },
+
+    { module: "Receivables", q: "What classifies non-invoice adjustments and determines the related accounting treatment?",
+      options: ["A) Business unit", "B) Receivables activity", "C) Transaction source/type", "D) Credit-to-cash"],
+      correctIndex: 1,
+      explanation: "Receivables activity — Classifies non-invoice adjustments and determines the related accounting treatment." },
+
+    { module: "Receivables", q: "What defines transaction processing context and influences reference data, sequencing, accounting, and reporting?",
+      options: ["A) Business unit", "B) Receivables activity", "C) Transaction source/type", "D) Credit-to-cash"],
+      correctIndex: 0,
+      explanation: "Business unit — Defines transaction processing context and influences reference data, sequencing, accounting, and reporting." },
+
+    { module: "Receivables", q: "What controls invoice origin, numbering, processing options, signs, and accounting behavior?",
+      options: ["A) Business unit", "B) Receivables activity", "C) Transaction source/type", "D) Credit-to-cash"],
+      correctIndex: 2,
+      explanation: "Transaction source/type — Controls invoice origin, numbering, processing options, signs, and accounting behavior." },
+
+    { module: "Receivables", q: "In the five-step path for Receivables configuration, what is Step 1?",
+      options: ["A) Configure system options", "B) Confirm enterprise context", "C) Create transaction controls", "D) Prepare receipt controls"],
+      correctIndex: 1,
+      explanation: "Step 1 Confirm enterprise context — Validate legal entity, business unit, ledger, chart, currency, and reference data assignments." },
+
+    { module: "Receivables", q: "What does 'Configure system options' involve?",
+      options: ["A) Creating transaction sources", "B) Defining core Receivables processing, accounting, tax, and default behaviors", "C) Setting receipt classes", "D) Running smoke test"],
+      correctIndex: 1,
+      explanation: "Step 2 Configure system options — Define core Receivables processing, accounting, tax, and default behaviors." },
+
+    { module: "Receivables", q: "What does 'Create transaction controls' involve?",
+      options: ["A) Setting receipt classes", "B) Setting transaction sources, types, memo lines, activities, and sequencing", "C) Defining system options", "D) Running smoke test"],
+      correctIndex: 1,
+      explanation: "Step 3 Create transaction controls — Set transaction sources, types, memo lines, activities, and sequencing." },
+
+    { module: "Receivables", q: "What does 'Prepare receipt controls' involve?",
+      options: ["A) Setting transaction sources", "B) Setting receipt classes, methods, bank remittance behavior, and application rules", "C) Defining system options", "D) Running smoke test"],
+      correctIndex: 1,
+      explanation: "Step 4 Prepare receipt controls — Set receipt classes, methods, bank remittance behavior, and application rules." },
+
+    { module: "Receivables", q: "What is the minimum end-to-end smoke test for Receivables?",
+      options: ["A) Create one invoice only", "B) Create one invoice, one receipt, accounting, and a GL reconciliation trace", "C) Create one receipt only", "D) Create one customer only"],
+      correctIndex: 1,
+      explanation: "Step 5 Run smoke test — Create one invoice, one receipt, accounting, and a GL reconciliation trace." },
+
+    { module: "Receivables", q: "Which setup objects control invoice origin and behavior?",
+      options: ["A) Business unit", "B) Transaction sources and types", "C) Receipt classes", "D) Customer profiles"],
+      correctIndex: 1,
+      explanation: "Transaction source/type controls invoice origin, numbering, processing options, signs, and accounting behavior." },
+
+    { module: "Receivables", q: "Why does the business unit matter in Receivables?",
+      options: ["A) It doesn't matter", "B) It defines transaction processing context and influences reference data, sequencing, accounting, and reporting", "C) It's only for reporting", "D) It's only for accounting"],
+      correctIndex: 1,
+      explanation: "Business unit defines transaction processing context and influences reference data, sequencing, accounting, and reporting." },
+
+    { module: "Receivables", q: "What is the commercial relationship used for billing, receipts, credit, and collections?",
+      options: ["A) Party", "B) Customer account", "C) Site", "D) Profile"],
+      correctIndex: 1,
+      explanation: "Customer account — The commercial relationship used for billing, receipts, credit, and collections." },
+
+    { module: "Receivables", q: "What defines where and how an account is used, such as bill-to, ship-to, or statement delivery?",
+      options: ["A) Customer account", "B) Account site and site use", "C) Customer profile", "D) AutoInvoice"],
+      correctIndex: 1,
+      explanation: "Account site and site use — Defines where and how an account is used, such as bill-to, ship-to, or statement delivery." },
+
+    { module: "Receivables", q: "What stores credit, payment, statement, dunning, and collection defaults at account or site level?",
+      options: ["A) Customer account", "B) Account site", "C) Customer profile", "D) AutoInvoice"],
+      correctIndex: 2,
+      explanation: "Customer profile — Stores credit, payment, statement, dunning, and collection defaults at account or site level." },
+
+    { module: "Receivables", q: "What imports, validates, groups, and creates Receivables transactions from external or Oracle source systems?",
+      options: ["A) Customer account", "B) Account site", "C) Customer profile", "D) AutoInvoice"],
+      correctIndex: 3,
+      explanation: "AutoInvoice — Imports, validates, groups, and creates Receivables transactions from external or Oracle source systems." },
+
+    { module: "Receivables", q: "What is the difference between a party and customer account?",
+      options: ["A) No difference", "B) Party is the entity; customer account is the commercial relationship for billing, receipts, credit, collections", "C) Customer account is the entity; party is the commercial relationship", "D) Both are the same"],
+      correctIndex: 1,
+      explanation: "A party is the entity (person or organization); a customer account is the commercial relationship used for billing, receipts, credit, and collections." },
+
+    { module: "Receivables", q: "Which profile settings affect collection behavior?",
+      options: ["A) Only credit limit", "B) Credit, payment, statement, dunning, and collection defaults", "C) Only payment terms", "D) Only statement delivery"],
+      correctIndex: 1,
+      explanation: "Customer profile stores credit, payment, statement, dunning, and collection defaults at account or site level." },
+
+    { module: "Receivables", q: "How is AutoInvoice completeness proven?",
+      options: ["A) By checking the invoice count", "B) By reconciling source-system records to accepted and rejected AutoInvoice lines", "C) By checking the total amount", "D) By checking the customer"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Billing completeness — Reconcile source-system records to accepted and rejected AutoInvoice lines." },
+
+    { module: "Receivables", q: "What controls creation, remittance, clearance, bank account, and accounting behavior?",
+      options: ["A) Receipt class/method", "B) Cash application", "C) AutoCash rule set", "D) Lockbox"],
+      correctIndex: 0,
+      explanation: "Receipt class/method — Controls creation, remittance, clearance, bank account, and accounting behavior." },
+
+    { module: "Receivables", q: "What matches a receipt to invoices, debit memos, chargebacks, or on-account balances?",
+      options: ["A) Receipt class/method", "B) Cash application", "C) AutoCash rule set", "D) Lockbox"],
+      correctIndex: 1,
+      explanation: "Cash application — Matches a receipt to invoices, debit memos, chargebacks, or on-account balances." },
+
+    { module: "Receivables", q: "What applies receipts automatically using an ordered set of matching and balance rules?",
+      options: ["A) Receipt class/method", "B) Cash application", "C) AutoCash rule set", "D) Lockbox"],
+      correctIndex: 2,
+      explanation: "AutoCash rule set — Applies receipts automatically using an ordered set of matching and balance rules." },
+
+    { module: "Receivables", q: "What imports bank-provided payment files and creates or applies receipts at scale?",
+      options: ["A) Receipt class/method", "B) Cash application", "C) AutoCash rule set", "D) Lockbox"],
+      correctIndex: 3,
+      explanation: "Lockbox — Imports bank-provided payment files and creates or applies receipts at scale." },
+
+    { module: "Receivables", q: "What is controlled by a receipt method?",
+      options: ["A) Only bank account", "B) Creation, remittance, clearance, bank account, and accounting behavior", "C) Only clearance", "D) Only accounting"],
+      correctIndex: 1,
+      explanation: "Receipt class/method controls creation, remittance, clearance, bank account, and accounting behavior." },
+
+    { module: "Receivables", q: "When should cash remain unapplied?",
+      options: ["A) Never", "B) When it cannot be matched to specific invoices and is kept on account", "C) Always", "D) Only for lockbox"],
+      correctIndex: 1,
+      explanation: "Cash application matches a receipt to invoices, debit memos, chargebacks, or on-account balances. If it can't be matched, it remains unapplied/on-account." },
+
+    { module: "Receivables", q: "Which totals validate a lockbox import?",
+      options: ["A) Only invoice totals", "B) Bank file totals, imported receipts, unapplied amounts, and rejected records", "C) Only receipt totals", "D) Only rejected records"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Control totals — Compare bank file totals, imported receipts, unapplied amounts, and rejected records." },
+
+    { module: "Receivables", q: "What determines whether receivables are recognized in advance or in arrears relative to revenue scheduling?",
+      options: ["A) Accounting rule", "B) Invoice rule", "C) Deferred revenue", "D) Revenue adjustment"],
+      correctIndex: 1,
+      explanation: "Invoice rule — Determines whether receivables are recognized in advance or in arrears relative to revenue scheduling." },
+
+    { module: "Receivables", q: "What spreads revenue across periods using a defined schedule and rule duration?",
+      options: ["A) Invoice rule", "B) Accounting rule", "C) Deferred revenue", "D) Revenue adjustment"],
+      correctIndex: 1,
+      explanation: "Accounting rule — Spreads revenue across periods using a defined schedule and rule duration." },
+
+    { module: "Receivables", q: "What represents billed or collected consideration not yet recognized as earned revenue?",
+      options: ["A) Invoice rule", "B) Accounting rule", "C) Deferred revenue", "D) Revenue adjustment"],
+      correctIndex: 2,
+      explanation: "Deferred revenue — Represents billed or collected consideration not yet recognized as earned revenue." },
+
+    { module: "Receivables", q: "What changes the amount or timing of revenue and must retain approval and audit evidence?",
+      options: ["A) Invoice rule", "B) Accounting rule", "C) Deferred revenue", "D) Revenue adjustment"],
+      correctIndex: 3,
+      explanation: "Revenue adjustment — Changes the amount or timing of revenue and must retain approval and audit evidence." },
+
+    { module: "Receivables", q: "What is the role of an accounting rule?",
+      options: ["A) To determine invoice origin", "B) To spread revenue across periods using a defined schedule and rule duration", "C) To calculate tax", "D) To create customers"],
+      correctIndex: 1,
+      explanation: "Accounting rule spreads revenue across periods using a defined schedule and rule duration." },
+
+    { module: "Receivables", q: "Which date controls the revenue schedule?",
+      options: ["A) Invoice date", "B) Start date (and contract date)", "C) Payment date", "D) GL date"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Cutoff — Review start dates, contract dates, and incomplete schedules around period end." },
+
+    { module: "Receivables", q: "What groups open balances by due-date buckets to reveal delinquency and collection priority?",
+      options: ["A) Aging", "B) AR-to-GL reconciliation", "C) Credit profile", "D) Scoring model"],
+      correctIndex: 0,
+      explanation: "Aging — Groups open balances by due-date buckets to reveal delinquency and collection priority." },
+
+    { module: "Receivables", q: "What explains differences between Receivables activity and General Ledger control-account balances?",
+      options: ["A) Aging", "B) AR-to-GL reconciliation", "C) Credit profile", "D) Scoring model"],
+      correctIndex: 1,
+      explanation: "AR-to-GL reconciliation — Explains differences between Receivables activity and General Ledger control-account balances." },
+
+    { module: "Receivables", q: "What stores credit limits, review cycle, risk attributes, and order or transaction controls?",
+      options: ["A) Aging", "B) AR-to-GL reconciliation", "C) Credit profile", "D) Scoring model"],
+      correctIndex: 2,
+      explanation: "Credit profile — Stores credit limits, review cycle, risk attributes, and order or transaction controls." },
+
+    { module: "Receivables", q: "What calculates credit risk from weighted data points and maps scores to credit recommendations?",
+      options: ["A) Aging", "B) AR-to-GL reconciliation", "C) Credit profile", "D) Scoring model"],
+      correctIndex: 3,
+      explanation: "Scoring model — Calculates credit risk from weighted data points and maps scores to credit recommendations." },
+
+    { module: "Receivables", q: "What can cause AR-to-GL differences?",
+      options: ["A) Only unaccounted transactions", "B) Unaccounted transactions, invalid accounts, manual GL entries, timing differences", "C) Only manual GL entries", "D) Only timing differences"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Reconciliation timing — Resolve unaccounted transactions, invalid accounts, and manual GL entries before sign-off." },
+
+    { module: "Receivables", q: "Which exposures belong in a credit review?",
+      options: ["A) Only open invoices", "B) Open invoices, pending orders, disputes, guarantees, and related-party exposure", "C) Only pending orders", "D) Only guarantees"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Complete exposure — Include open invoices, pending orders, disputes, guarantees, and related-party exposure where policy requires." },
+
+    { module: "Receivables", q: "How should a credit override expire?",
+      options: ["A) Never", "B) With reason, authority, expiry, and post-review", "C) After one year", "D) After one month"],
+      correctIndex: 1,
+      explanation: "CONTROL03 Override governance — Credit-limit overrides require reason, authority, expiry, and post-review." },
+
+    { module: "Receivables", q: "What quantifies risk or priority using customer behavior, balance, delinquency, and other data points?",
+      options: ["A) Collections score", "B) Strategy", "C) Correspondence", "D) Promise to pay"],
+      correctIndex: 0,
+      explanation: "Collections score — Quantifies risk or priority using customer behavior, balance, delinquency, and other data points." },
+
+    { module: "Receivables", q: "What is a sequenced set of automated and manual tasks such as calls, emails, reviews, and escalation?",
+      options: ["A) Collections score", "B) Strategy", "C) Correspondence", "D) Promise to pay"],
+      correctIndex: 1,
+      explanation: "Strategy — A sequenced set of automated and manual tasks such as calls, emails, reviews, and escalation." },
+
+    { module: "Receivables", q: "What is formal communication that requests payment and may escalate language or frequency over time?",
+      options: ["A) Collections score", "B) Strategy", "C) Correspondence", "D) Promise to pay"],
+      correctIndex: 2,
+      explanation: "Correspondence — Formal communication that requests payment and may escalate language or frequency over time." },
+
+    { module: "Receivables", q: "What is a customer commitment with amount and date that should be monitored for fulfillment or breach?",
+      options: ["A) Collections score", "B) Strategy", "C) Correspondence", "D) Promise to pay"],
+      correctIndex: 3,
+      explanation: "Promise to pay — A customer commitment with amount and date that should be monitored for fulfillment or breach." },
+
+    { module: "Receivables", q: "How does segmentation change treatment?",
+      options: ["A) It doesn't", "B) Groups customers by value, risk, delinquency, geography, or service model to tailor collection strategy", "C) Only by geography", "D) Only by value"],
+      correctIndex: 1,
+      explanation: "Segment portfolio — Group customers by value, risk, delinquency, geography, or service model." },
+
+    { module: "Receivables", q: "What makes a promise to pay auditable?",
+      options: ["A) Only the amount", "B) Amount, due date, source, owner, and outcome tracking", "C) Only the date", "D) Only the customer"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Promise discipline — Promises require amount, due date, source, owner, and outcome tracking." },
+
+    // ===== GL & AP =====
+    { module: "GL & AP", q: "What are the main areas covered in the Oracle Financial Fusion Cloud Business Cycle?",
+      options: ["A) Oracle interface & navigation, General Ledger, Procure to Pay", "B) Only General Ledger", "C) Only Procure to Pay", "D) Only navigation"],
+      correctIndex: 0,
+      explanation: "The document covers Oracle interface & navigation, General Ledger, and Procure to Pay." },
+
+    { module: "GL & AP", q: "What is the first step in creating an AP invoice?",
+      options: ["A) Manage Invoices", "B) Create Invoice", "C) Validate Invoice", "D) Post to Ledger"],
+      correctIndex: 1,
+      explanation: "From Payables, click Create Invoice to start the invoice creation process." },
+
+    { module: "GL & AP", q: "What are the invoice validation statuses?",
+      options: ["A) Only Validated", "B) Validated, Not validated, and others", "C) Only Not validated", "D) Only Posted"],
+      correctIndex: 1,
+      explanation: "Invoices can be Validated, Not validated, etc." },
+
+    { module: "GL & AP", q: "What is the process for creating an AP payment?",
+      options: ["A) Manage Payments", "B) Create Invoice", "C) Validate Invoice", "D) Post to Ledger"],
+      correctIndex: 0,
+      explanation: "Navigate to Payments > Manage Payments to create and manage payments." },
+
+    { module: "GL & AP", q: "What must be done before an invoice can be paid?",
+      options: ["A) Nothing", "B) It must be validated and accounted", "C) Only created", "D) Only approved"],
+      correctIndex: 1,
+      explanation: "Invoices must be validated and accounted before payment processing." },
+
+    // ===== TAX =====
+    { module: "Oracle Fusion Tax", q: "What forms the tax model?",
+      options: ["A) Only tax rate", "B) Regime, tax, status, rate, jurisdiction, recovery, registration, and rules", "C) Only jurisdiction", "D) Only regime"],
+      correctIndex: 1,
+      explanation: "Configuration hierarchy — Regime, tax, status, rate, jurisdiction, recovery, registration, and rules form the tax model." },
+
+    { module: "Oracle Fusion Tax", q: "What is a rule-driven evaluation that decides which taxes apply, where they apply, and how they are calculated?",
+      options: ["A) Taxable basis", "B) Tax determination", "C) Configuration hierarchy", "D) Integration"],
+      correctIndex: 1,
+      explanation: "Tax determination — A rule-driven evaluation decides which taxes apply, where they apply, and how they are calculated." },
+
+    { module: "Oracle Fusion Tax", q: "What is the amount on which tax is calculated after line amounts, discounts, charges, compounding, and exemptions?",
+      options: ["A) Taxable basis", "B) Tax determination", "C) Configuration hierarchy", "D) Integration"],
+      correctIndex: 0,
+      explanation: "Taxable basis — The amount on which tax is calculated after line amounts, discounts, charges, compounding, and exemptions." },
+
+    { module: "Oracle Fusion Tax", q: "What creates input/recoverable tax?",
+      options: ["A) AR", "B) AP", "C) GL", "D) SLA"],
+      correctIndex: 1,
+      explanation: "Integration — AP creates input/recoverable tax, AR creates output tax, and SLA transfers tax accounting to GL." },
+
+    { module: "Oracle Fusion Tax", q: "What creates output tax?",
+      options: ["A) AP", "B) AR", "C) GL", "D) SLA"],
+      correctIndex: 1,
+      explanation: "AR creates output tax." },
+
+    { module: "Oracle Fusion Tax", q: "What transfers tax accounting to GL?",
+      options: ["A) AP", "B) AR", "C) GL", "D) SLA (Subledger Accounting)"],
+      correctIndex: 3,
+      explanation: "SLA (Subledger Accounting) transfers tax accounting to GL." },
+
+    { module: "Oracle Fusion Tax", q: "In the five-step path for Tax configuration, what is Step 1?",
+      options: ["A) Build core model", "B) Discover obligations", "C) Set party/product data", "D) Define rules"],
+      correctIndex: 1,
+      explanation: "Step 1 Discover obligations — Document countries, taxes, authorities, registrations, recovery, exemptions, withholding, and reports." },
+
+    { module: "Oracle Fusion Tax", q: "What does 'Build core model' involve?",
+      options: ["A) Documenting obligations", "B) Configuring jurisdictions, regimes, taxes, statuses, rates, accounts, and effective dates", "C) Maintaining party data", "D) Defining rules"],
+      correctIndex: 1,
+      explanation: "Step 2 Build core model — Configure jurisdictions, regimes, taxes, statuses, rates, accounts, and effective dates." },
+
+    { module: "Oracle Fusion Tax", q: "What does 'Set party/product data' involve?",
+      options: ["A) Configuring jurisdictions", "B) Maintaining first-party profiles, supplier/customer tax profiles, registrations, classifications, and fiscal codes", "C) Defining rules", "D) Validating and reporting"],
+      correctIndex: 1,
+      explanation: "Step 3 Set party/product data — Maintain first-party profiles, supplier/customer tax profiles, registrations, classifications, and fiscal codes." },
+
+    { module: "Oracle Fusion Tax", q: "What does 'Define rules' involve?",
+      options: ["A) Configuring jurisdictions", "B) Configuring place of supply, applicability, registration, status, rate, recovery, and taxable-basis rules", "C) Maintaining party data", "D) Validating and reporting"],
+      correctIndex: 1,
+      explanation: "Step 4 Define rules — Configure place of supply, applicability, registration, status, rate, recovery, and taxable-basis rules." },
+
+    { module: "Oracle Fusion Tax", q: "What does 'Validate and report' involve?",
+      options: ["A) Configuring jurisdictions", "B) Testing a scenario matrix, reconciling tax accounts, and producing authority-facing reports", "C) Maintaining party data", "D) Defining rules"],
+      correctIndex: 1,
+      explanation: "Step 5 Validate and report — Test a scenario matrix, reconcile tax accounts, and produce authority-facing reports." },
+
+    { module: "Oracle Fusion Tax", q: "What should be tested before production activation?",
+      options: ["A) Only standard scenarios", "B) All material transaction patterns, including exceptions", "C) Only exceptions", "D) Only one scenario"],
+      correctIndex: 1,
+      explanation: "CONTROL01 Scenario matrix — Test all material transaction patterns, including exceptions, before production activation." },
+
+    { module: "Oracle Fusion Tax", q: "What do manual tax changes require?",
+      options: ["A) Nothing", "B) Reason, authorized role, and periodic review", "C) Only reason", "D) Only approval"],
+      correctIndex: 1,
+      explanation: "CONTROL02 Override monitoring — Manual tax changes require reason, authorized role, and periodic review." },
+
+    { module: "Oracle Fusion Tax", q: "What must agree by period for tax reconciliation?",
+      options: ["A) Only tax reports", "B) Tax reports, AP/AR tax lines, SLA journals, and GL control accounts", "C) Only AP/AR tax lines", "D) Only GL control accounts"],
+      correctIndex: 1,
+      explanation: "CONTROL03 Tax reconciliation — Tax reports, AP/AR tax lines, SLA journals, and GL control accounts must agree by period." },
+
+    { module: "Oracle Fusion Tax", q: "Which objects make up the tax hierarchy?",
+      options: ["A) Only regime and tax", "B) Regime, tax, status, rate, jurisdiction, recovery, registration, and rules", "C) Only jurisdiction and rate", "D) Only tax and rate"],
+      correctIndex: 1,
+      explanation: "The tax hierarchy includes regime, tax, status, rate, jurisdiction, recovery, registration, and rules." },
+
+    { module: "Oracle Fusion Tax", q: "What can change the taxable basis?",
+      options: ["A) Only line amount", "B) Line amounts, discounts, charges, compounding, and exemptions", "C) Only discounts", "D) Only exemptions"],
+      correctIndex: 1,
+      explanation: "Taxable basis is the amount on which tax is calculated after line amounts, discounts, charges, compounding, and exemptions." },
+
+    { module: "Oracle Fusion Tax", q: "How is tax reconciled across AP, AR, SLA, and GL?",
+      options: ["A) Not possible", "B) Tax reports, AP/AR tax lines, SLA journals, and GL control accounts must agree by period", "C) Only through GL", "D) Only through AP"],
+      correctIndex: 1,
+      explanation: "Tax reconciliation requires that tax reports, AP/AR tax lines, SLA journals, and GL control accounts agree by period." }
+];
+
+// ============ STATE ============
+const state = {
+    currentIndex: 0,
+    userAnswers: {},       // { qIndex: { selected, correct } }
+    activeFilter: 'all',
+    visibleIndexes: []     // indexes of questions currently visible based on filter
+};
+
+// ============ DOM ============
+const questionEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const feedbackEl = document.getElementById('feedback');
+const feedbackTitle = document.getElementById('feedback-title');
+const feedbackEncouragement = document.getElementById('feedback-encouragement');
+const explanationEl = document.getElementById('explanation');
+const progressText = document.getElementById('progress-text');
+const progressBar = document.getElementById('progress-bar');
+const moduleBadge = document.getElementById('module-badge');
+const questionGrid = document.getElementById('question-grid');
+const scoreDisplay = document.getElementById('score-display');
+const nextBtnTop = document.getElementById('next-btn-top');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtnBottom = document.getElementById('next-btn-bottom');
+
+const successMessages = ["عاش يا منون! 🌟", "الله عليكي يا بشمهندسة! 👏", "إجابة بيرفكت! 💖", "شطورة جداً! ✨", "كده يا قمر! 🌸", "برافو عليكي! 🎉"];
+const failMessages = ["ولا يهمك، ركزي في اللي جاي! 💪", "عادي جداً، اقري الشرح وهتثبت! 🌸", "مفيش مشكلة، احنا بنتعلم! 💖", "المهم تفهمي السبب! 📚"];
+
+// ============ FILTERS ============
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.activeFilter = btn.dataset.module;
+        applyFilter();
+    });
+});
+
+function applyFilter() {
+    if (state.activeFilter === 'all') {
+        state.visibleIndexes = allQuestions.map((_, i) => i);
+    } else {
+        state.visibleIndexes = allQuestions
+            .map((q, i) => q.module === state.activeFilter ? i : -1)
+            .filter(i => i !== -1);
+    }
+
+    if (state.visibleIndexes.length === 0) return;
+
+    // If current is not in visible indexes, jump to first visible
+    if (!state.visibleIndexes.includes(state.currentIndex)) {
+        state.currentIndex = state.visibleIndexes[0];
+    }
+
+    buildQuestionGrid();
+    loadQuestion();
+}
+
+// ============ BUILD GRID ============
+function buildQuestionGrid() {
+    questionGrid.innerHTML = '';
+    allQuestions.forEach((q, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'q-num';
+        btn.textContent = i + 1;
+        btn.dataset.index = i;
+
+        if (!state.visibleIndexes.includes(i)) {
+            btn.classList.add('hidden');
+        }
+
+        const ans = state.userAnswers[i];
+        if (ans) {
+            btn.classList.add(ans.correct ? 'correct' : 'wrong');
+        }
+        if (i === state.currentIndex) {
+            btn.classList.add('current');
+        }
+
+        btn.onclick = () => jumpToQuestion(i);
+        questionGrid.appendChild(btn);
+    });
+}
+
+function updateGridCurrent() {
+    questionGrid.querySelectorAll('.q-num').forEach(btn => {
+        btn.classList.toggle('current', parseInt(btn.dataset.index) === state.currentIndex);
+    });
+    // Scroll current into view
+    const currentBtn = questionGrid.querySelector('.q-num.current');
+    if (currentBtn) currentBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function updateGridAnswer(index) {
+    const btn = questionGrid.querySelector(`.q-num[data-index="${index}"]`);
+    if (!btn) return;
+    btn.classList.remove('correct', 'wrong');
+    const ans = state.userAnswers[index];
+    if (ans) btn.classList.add(ans.correct ? 'correct' : 'wrong');
+}
+
+// ============ NAVIGATION ============
+function jumpToQuestion(index) {
+    if (!state.visibleIndexes.includes(index)) return;
+    state.currentIndex = index;
+    updateGridCurrent();
+    loadQuestion();
+}
+
+function prevQuestion() {
+    const pos = state.visibleIndexes.indexOf(state.currentIndex);
+    if (pos > 0) {
+        jumpToQuestion(state.visibleIndexes[pos - 1]);
+    }
+}
+
+function nextQuestion() {
+    const pos = state.visibleIndexes.indexOf(state.currentIndex);
+    if (pos < state.visibleIndexes.length - 1) {
+        jumpToQuestion(state.visibleIndexes[pos + 1]);
+    } else {
+        showResults();
+    }
+}
+
+// ============ LOAD QUESTION ============
+function loadQuestion() {
+    feedbackEl.style.display = 'none';
+    feedbackEl.className = 'feedback';
+    nextBtnBottom.style.display = 'none';
+    optionsEl.innerHTML = '';
+
+    const q = allQuestions[state.currentIndex];
+    questionEl.innerText = q.q;
+    moduleBadge.innerText = q.module;
+
+    const pos = state.visibleIndexes.indexOf(state.currentIndex);
+    progressText.innerText = `سؤال ${state.currentIndex + 1} من ${allQuestions.length} (${pos + 1} من ${state.visibleIndexes.length} في الفلتر)`;
+    progressBar.style.width = `${((state.currentIndex + 1) / allQuestions.length) * 100}%`;
+
+    // Prev / Next disabled?
+    prevBtn.disabled = pos <= 0;
+    const isLast = pos >= state.visibleIndexes.length - 1;
+    nextBtnTop.textContent = isLast ? 'النتيجة 🏁' : 'التالي ➡️';
+
+    // If already answered - show result
+    const existing = state.userAnswers[state.currentIndex];
+
+    q.options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.dataset.index = index;
+
+        if (existing) {
+            btn.disabled = true;
+            if (index === q.correctIndex) btn.classList.add('correct');
+            if (index === existing.selected && !existing.correct) btn.classList.add('wrong');
+        } else {
+            btn.onclick = () => checkAnswer(index, btn);
+        }
+        optionsEl.appendChild(btn);
+    });
+
+    if (existing) {
+        showFeedback(existing.correct, q.explanation);
+    }
+
+    updateScoreDisplay();
+    updateGridCurrent();
+}
+
+function checkAnswer(selectedIndex, btn) {
+    const q = allQuestions[state.currentIndex];
+    const allBtns = optionsEl.children;
+
+    for (let i = 0; i < allBtns.length; i++) {
+        allBtns[i].disabled = true;
+        if (i === q.correctIndex) allBtns[i].classList.add('correct');
+    }
+
+    const isCorrect = selectedIndex === q.correctIndex;
+    if (!isCorrect) btn.classList.add('wrong');
+
+    state.userAnswers[state.currentIndex] = { selected: selectedIndex, correct: isCorrect };
+
+    updateGridAnswer(state.currentIndex);
+    showFeedback(isCorrect, q.explanation);
+    updateScoreDisplay();
+}
+
+function showFeedback(isCorrect, explanation) {
+    if (isCorrect) {
+        feedbackTitle.innerText = "صح! 🎉";
+        feedbackTitle.style.color = "#28a745";
+        feedbackEl.classList.add('correct-bg');
+        feedbackEncouragement.innerText = successMessages[Math.floor(Math.random() * successMessages.length)];
+    } else {
+        feedbackTitle.innerText = "غلط 🥺";
+        feedbackTitle.style.color = "#dc3545";
+        feedbackEl.classList.add('wrong-bg');
+        feedbackEncouragement.innerText = failMessages[Math.floor(Math.random() * failMessages.length)];
+    }
+    explanationEl.innerHTML = `<strong>السبب (Explanation):</strong><br> ${explanation}`;
+    feedbackEl.style.display = 'block';
+
+    const pos = state.visibleIndexes.indexOf(state.currentIndex);
+    const isLast = pos >= state.visibleIndexes.length - 1;
+    if (isLast) {
+        nextBtnBottom.innerText = 'عرض النتيجة النهائية 🏁';
+    } else {
+        nextBtnBottom.innerText = 'السؤال اللي بعده يا بطلة 🚀';
+    }
+    nextBtnBottom.style.display = 'block';
+}
+
+function updateScoreDisplay() {
+    const total = Object.keys(state.userAnswers).length;
+    const correct = Object.values(state.userAnswers).filter(a => a.correct).length;
+    scoreDisplay.innerText = `النتيجة: ${correct} / ${total}`;
+}
+
+// ============ RESULTS ============
+function showResults() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+
+    const answered = Object.keys(state.userAnswers).length;
+    const correct = Object.values(state.userAnswers).filter(a => a.correct).length;
+    const wrong = answered - correct;
+
+    document.getElementById('stat-total').innerText = allQuestions.length;
+    document.getElementById('stat-correct').innerText = correct;
+    document.getElementById('stat-wrong').innerText = wrong;
+
+    const pct = answered > 0 ? (correct / answered) : 0;
+    document.getElementById('final-score').innerText = `${Math.round(pct * 100)}% (${correct}/${answered})`;
+
+    const msgEl = document.getElementById('final-message');
+    if (answered === 0) {
+        msgEl.innerText = "لسه مجاوبتيش على أي سؤال يا قمر، يلا ابدئي! 💪🌸";
+    } else if (pct === 1) {
+        msgEl.innerText = "ايه الحلاوة دي! انتي جاهزة تقفلي الامتحان وانتي حاطة رجل على رجل! 😎👑";
+    } else if (pct >= 0.7) {
+        msgEl.innerText = "عاش جداً يا منون! مستواكي ممتاز، راجعي بس على الكام سؤال اللي فاتوا وهتبقي وحش! 🚀💖";
+    } else if (pct >= 0.5) {
+        msgEl.innerText = "كده تمام يا قمر! محتاجة تراجعي شوية كمان وهتبقي جاهزة! 💪🌸";
+    } else {
+        msgEl.innerText = "ولا يهمك خالص! راجعي الشرح وادخلي جربي تاني، انتي هتقفليها! 💪🌸";
+    }
+}
+
+function resetQuiz() {
+    state.currentIndex = 0;
+    state.userAnswers = {};
+    state.activeFilter = 'all';
+
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.filter-btn[data-module="all"]').classList.add('active');
+
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('result-screen').style.display = 'none';
+
+    applyFilter();
+    updateScoreDisplay();
+}
+
+// ============ INIT ============
+applyFilter();
+updateScoreDisplay();
+</script>
+
+</body>
+</html>
